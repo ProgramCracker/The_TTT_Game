@@ -8,11 +8,19 @@ public class GameSpace : MonoBehaviour
 {
     public Button _button;
     public TMP_Text _buttonText;
-    public string _playerSide;
+    
+
+    private GameController _gameController;
 
     public void SetSpace()
     {
-        _buttonText.text = _playerSide;
+        _buttonText.text = _gameController.GetPlayerSide();
         _button.interactable = false;
+        _gameController.EndTurn();
+    }
+
+    public void SetGameController(GameController controller)
+    {
+        _gameController = controller;
     }
 }
