@@ -14,9 +14,13 @@ public class GameSpace : MonoBehaviour
 
     public void SetSpace()
     {
-        _buttonText.text = _gameController.GetPlayerSide();
-        _button.interactable = false;
-        _gameController.EndTurn();
+        if (_gameController._playerMove == true)
+        {
+            _buttonText.text = _gameController.GetPlayerSide();
+            _button.interactable = false;
+            _gameController.EndTurn();
+        }
+
     }
 
     public void SetGameController(GameController controller)
