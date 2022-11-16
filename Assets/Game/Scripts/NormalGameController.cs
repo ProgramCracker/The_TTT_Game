@@ -3,202 +3,87 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-
+using UnityEngine.UIElements;
+using Button = UnityEngine.UI.Button;
 
 public class NormalGameController : MonoBehaviour
 {
-    public TMP_Text[] _buttonList;
+    [Header("Game Info")]
+    [SerializeField] int _turn = 1;
+    [SerializeField] bool _AI1 = false;
+    [SerializeField] bool _AI2 = false;
+    [SerializeField] float _AIdelay;
 
-    public GameObject _gameOverPanel;
-    public TMP_Text _gameOverText;
+    public enum AILevel { VeryEasy, Easy, Medium, Impossible }
 
-    public GameObject _restartButton;
+    [SerializeField] AILevel _aiLevel;
+    [SerializeField] int[] _aiDepth;
 
-    public Player _playerX;
-    public Player _playerO;
-    public PlayerColor _activePlayerColor;
-    public PlayerColor _inactivePlayerColor;
+    [Header("Space Info")]
+    [SerializeField] int[] _gridSpaces;
 
-    public GameObject _startInfo;
+    [Header("Space Display")]
+    [SerializeField] TextMeshProUGUI[] _gridText;
+    [SerializeField] string[] _gridDisplayText;
+    [SerializeField] Color[] _gridDisplayColor;
 
+    [Header("Game State UI")]
+    [SerializeField] TextMeshProUGUI _gameStateText;
+    [SerializeField] GameObject _playAgainButton;
+    [SerializeField] Player _playerX;
+    [SerializeField] Player _playerO;
+    [SerializeField] PlayerColor _activePlayerColor;
+    [SerializeField] PlayerColor _inactivePlayerColor;
 
-    private string _playerSide;
-    private string _cpuSide;
-    public bool _playerMove;
-    public float _cpuDelay;
-    private int _value;
-
-    private int _moveCount;
-
-    private void Awake()
+    void Start()
     {
-        _gameOverPanel.SetActive(false);
-        SetGameControllerOnButtons();
-        _moveCount = 0;
-        _restartButton.SetActive(false);
-
-
-        _playerMove = true;
+        ResetGameState();
     }
 
-    private void Update()
+    void ResetGameState()
     {
-        if (_playerMove == false)
-        {
-            _cpuDelay += _cpuDelay * Time.deltaTime;
-            if(_cpuDelay >= 100)
-            {
-                _value = Random.Range(0, 8);
-                if (_buttonList[_value].GetComponentInParent<Button>().interactable == true)
-                {
-                    _buttonList[_value].text = GetCPUSide();
-                    _buttonList[_value].GetComponentInParent<Button>().interactable = false;
-                    EndTurn();
-                }
-            }
-        }
-    }
+        _gridSpaces = new int[9];
 
+        _turn = 1;
+        UpdateUI();
 
-
-
-    void SetGameControllerOnButtons()
-    {
-        for (int i = 0; i < _buttonList.Length; i++)
-        {
-           // _buttonList[i].GetComponentInParent<GameSpace>().SetGameController(this);
-        }
-    }
-
-    public void SetStartingSide(string startingSide)
-    {
-        _playerSide = startingSide;
-        if(_playerSide == "X")
-        {
-            _cpuSide = "O";
-            SetPlayerColors(_playerX, _playerO);
-        }
-        else
-        {
-            _cpuSide = "X";
-            SetPlayerColors(_playerO, _playerX);
-        }
-
-        StartGame();
-    }
-
-    void StartGame()
-    {
         SetBoardInteractable(true);
-        SetPlayerButtons(false);
-        _startInfo.SetActive(false);
+
+        _playAgainButton.SetActive(false);
+
+        StartCoroutine(AIMove());
+    }
+    void SetBoardInteractable(bool toggle)
+    {
+        for (int i = 0; i < _gridText.Length; i++)
+        {
+            _gridText[i].GetComponentInParent<Button>().interactable = toggle;
+        }
     }
 
-    public string GetPlayerSide()
+    void UpdateUI()
     {
-        return _playerSide;
+        for (int i = 0; i < _gridSpaces.Length; i++)
+        {
+            _gridText[i].text = _gridDisplayText[_gridSpaces[i]];
+            _gridText[i].color = _gridDisplayColor[_gridSpaces[i]];
+            
+        }
+
+        _gameStateText.text = "Player " + _turn + "'s Turn";
     }
 
-    public string GetCPUSide()
+    public void SpaceClicked(int spaceClicked)
     {
-        return _cpuSide;
-    }
+        SetPlayerColors(_playerO, _playerX);
+        if (_turn != -1 &&
+            ((_turn == 1 && !_AI1) || (_turn == 2 && !_AI2)))
+        {
+            
+            if (_gridSpaces[spaceClicked] == 0)
+                MakeMove(spaceClicked);
 
-    public void EndTurn()
-    {
-        _moveCount++;
-
-        //PLAYER WIN CONDITIONS
-        //row wins
-        if (_buttonList[0].text == _playerSide && _buttonList[1].text == _playerSide && _buttonList[2].text == _playerSide)
-        {
-            GameOver(_playerSide);
         }
-        else if (_buttonList[3].text == _playerSide && _buttonList[4].text == _playerSide && _buttonList[5].text == _playerSide)
-        {
-            GameOver(_playerSide);
-        }
-        else if(_buttonList[6].text == _playerSide && _buttonList[7].text == _playerSide && _buttonList[8].text == _playerSide)
-        {
-            GameOver(_playerSide);
-        }
-
-        //column wins
-        else if (_buttonList[0].text == _playerSide && _buttonList[3].text == _playerSide && _buttonList[6].text == _playerSide)
-        {
-            GameOver(_playerSide);
-        }
-        else if (_buttonList[1].text == _playerSide && _buttonList[4].text == _playerSide && _buttonList[7].text == _playerSide)
-        {
-            GameOver(_playerSide);
-        }
-        else if (_buttonList[2].text == _playerSide && _buttonList[5].text == _playerSide && _buttonList[8].text == _playerSide)
-        {
-            GameOver(_playerSide);
-        }
-
-        //diagnol wins
-        else if (_buttonList[0].text == _playerSide && _buttonList[4].text == _playerSide && _buttonList[8].text == _playerSide)
-        {
-            GameOver(_playerSide);
-        }
-        else if (_buttonList[2].text == _playerSide && _buttonList[4].text == _playerSide && _buttonList[6].text == _playerSide)
-        {
-            GameOver(_playerSide);
-        }
-
-
-        //CPU WIN CONDITIONS
-        //row wins
-        else if (_buttonList[0].text == _cpuSide && _buttonList[1].text == _cpuSide && _buttonList[2].text == _cpuSide)
-        {
-            GameOver(_cpuSide);
-        }
-        else if (_buttonList[3].text == _cpuSide && _buttonList[4].text == _cpuSide && _buttonList[5].text == _cpuSide)
-        {
-            GameOver(_cpuSide);
-        }
-        else if (_buttonList[6].text == _cpuSide && _buttonList[7].text == _cpuSide && _buttonList[8].text == _cpuSide)
-        {
-            GameOver(_cpuSide);
-        }
-
-        //column wins
-        else if (_buttonList[0].text == _cpuSide && _buttonList[3].text == _cpuSide && _buttonList[6].text == _cpuSide)
-        {
-            GameOver(_cpuSide);
-        }
-        else if (_buttonList[1].text == _cpuSide && _buttonList[4].text == _cpuSide && _buttonList[7].text == _cpuSide)
-        {
-            GameOver(_cpuSide);
-        }
-        else if (_buttonList[2].text == _cpuSide && _buttonList[5].text == _cpuSide && _buttonList[8].text == _cpuSide)
-        {
-            GameOver(_cpuSide);
-        }
-
-        //diagnol wins
-        else if (_buttonList[0].text == _cpuSide && _buttonList[4].text == _cpuSide && _buttonList[8].text == _cpuSide)
-        {
-            GameOver(_cpuSide);
-        }
-        else if (_buttonList[2].text == _cpuSide && _buttonList[4].text == _cpuSide && _buttonList[6].text == _cpuSide)
-        {
-            GameOver(_cpuSide);
-        }
-
-
-        else if (_moveCount >= 9)
-        {
-            GameOver("draw");
-        }
-        else
-        {
-            ChangeSide();
-            _cpuDelay = 10;
-        }
-
-
     }
 
     void SetPlayerColors(Player newPlayer, Player oldPlayer)
@@ -210,84 +95,238 @@ public class NormalGameController : MonoBehaviour
 
     }
 
-    void GameOver(string winner)
+    IEnumerator AIMove()
     {
-        SetBoardInteractable(false);
+        yield return new WaitForSeconds(_AIdelay);
+
+        if ((_AI1 && _turn == 1) || (_AI2 && _turn == 2))
+        {
+            int aiDepth = _aiDepth[(int)_aiLevel];
+            minimax(_gridSpaces, aiDepth, true, aiDepth);
+        }
+    }
+
+    int minimax(int[] currentSpaces, int aiDepth, bool maximizingPlayer, int initialDepth)
+    {
+        SetPlayerColors(_playerX, _playerO);
+        int gameOver = CheckWin(currentSpaces);
+        if (aiDepth == 0 || gameOver != -1)
+        {
+            if (gameOver == _turn)
+            {
+                return 1;
+            }
+            else if (gameOver != _turn && gameOver > 0)
+            {
+                return -1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        if (maximizingPlayer)
+        {
+            int maxEval = -10000;
+            List<int> possibleMoves = GetPossibleMoves(currentSpaces);
+
+            List<int> bestMove = new List<int>();
+            for (int i = 0; i < possibleMoves.Count; i++)
+            {
+                int[] newSpaces = new int[9];
+                for (int space = 0; space < 9; space++)
+                {
+                    newSpaces[space] = currentSpaces[space];
+                }
+                newSpaces[possibleMoves[i]] = _turn;
+
+                int eval = minimax(newSpaces, aiDepth - 1, false, initialDepth);
+                if (initialDepth == aiDepth)
+                {
+                    if (eval > maxEval)
+                    {
+                        bestMove.Clear();
+                        bestMove.Add(i);
+                    }
+                    else if (eval == maxEval)
+                    {
+                        bestMove.Add(i);
+                    }
+                }
+                maxEval = Mathf.Max(maxEval, eval);
+            }
+
+            if (initialDepth == aiDepth)
+            {
+                int moveChosen = bestMove[Random.Range(0, bestMove.Count)];
+                MakeMove(possibleMoves[moveChosen]);
+            }
+
+            return maxEval;
+        }
+        else
+        {
+            int minEval = 10000;
+            List<int> possibleMoves = GetPossibleMoves(currentSpaces);
+
+            for (int i = 0; i < possibleMoves.Count; i++)
+            {
+                int[] newSpaces = new int[9];
+                for (int space = 0; space < 9; space++)
+                {
+                    newSpaces[space] = currentSpaces[space];
+                }
+                newSpaces[possibleMoves[i]] = _turn == 1 ? 2 : 1;
+
+                int eval = minimax(newSpaces, aiDepth - 1, true, initialDepth);
+                minEval = Mathf.Min(minEval, eval);
+            }
+
+            return minEval;
+        }
+    }
+
+    void MakeMove(int spaceToMove)
+    {
+        _gridSpaces[spaceToMove] = _turn;
+        _turn = _turn == 1 ? 2 : 1;
+        UpdateUI();
+
+        CheckEndGame();
+
+        StartCoroutine(AIMove());
         
-        if (winner == "draw")
+        _gridText[spaceToMove].GetComponentInParent<Button>().interactable = false;
+    }
+
+    List<int> GetPossibleMoves(int[] spacesToCheck)
+    {
+        List<int> possibleMoves = new List<int>();
+        for (int i = 0; i < spacesToCheck.Length; i++)
         {
-            SetGameOverText("It's a Draw!");
-            SetPlayerColorsInactive();
+            if (spacesToCheck[i] == 0)
+                possibleMoves.Add(i);
+        }
+
+        return possibleMoves;
+    }
+
+    void Player1Wins()
+    {
+        _gameStateText.text = "Player 1 Wins!";
+    }
+
+    void Player2Wins()
+    {
+        _gameStateText.text = "Player 2 Wins!";
+    }
+
+    void CheckEndGame()
+    {
+        int win = CheckWin(_gridSpaces);
+
+        if (win == 0)
+            Tie();
+        else if (win == 1)
+            Player1Wins();
+        else if (win == 2)
+            Player2Wins();
+
+        if (win != -1)
+            EndGame();
+    }
+
+    void Tie()
+    {
+        _gameStateText.text = "Tie!";
+    }
+
+    void EndGame()
+    {
+        _turn = -1;
+
+        _playAgainButton.SetActive(true);
+    }
+
+    int CheckWin(int[] spacesToCheck)
+    {
+        List<int> spaceNum = new List<int>();
+
+        // Rows
+        int rowStart = 0;
+        for (int row = 0; row < 3; row++)
+        {
+            if (spacesToCheck[rowStart] == spacesToCheck[rowStart + 1] && spacesToCheck[rowStart + 1] == spacesToCheck[rowStart + 2])
+            {
+                if (spacesToCheck[rowStart] != 0)
+                    spaceNum.Add(spacesToCheck[rowStart]);
+            }
+
+            rowStart += 3;
+        }
+
+        // Columns
+        int columnStart = 0;
+        for (int column = 0; column < 3; column++)
+        {
+            if (spacesToCheck[columnStart] == spacesToCheck[columnStart + 3] && spacesToCheck[columnStart + 3] == spacesToCheck[columnStart + 6])
+            {
+                if (spacesToCheck[columnStart] != 0)
+                    spaceNum.Add(spacesToCheck[columnStart]);
+            }
+
+            columnStart++;
+        }
+
+        // Diagonal Up
+        if (spacesToCheck[0] == spacesToCheck[4] && spacesToCheck[4] == spacesToCheck[8])
+        {
+            if (spacesToCheck[0] != 0)
+                spaceNum.Add(spacesToCheck[0]);
+        }
+
+        // Diagonal Down
+        if (spacesToCheck[6] == spacesToCheck[4] && spacesToCheck[4] == spacesToCheck[2])
+        {
+            if (spacesToCheck[6] != 0)
+                spaceNum.Add(spacesToCheck[6]);
+        }
+
+        if (spaceNum.Count > 0)
+        {
+            for (int i = 0; i < spaceNum.Count; i++)
+            {
+                if (spaceNum[i] == 1)
+                {
+                    return 1;
+                }
+                else if (spaceNum[i] == 2)
+                {
+                    return 2;
+                }
+            }
         }
         else
         {
-            SetGameOverText(winner + " Wins!");
+            int freeSpaces = 0;
+            for (int i = 0; i < _gridSpaces.Length; i++)
+            {
+                if (spacesToCheck[i] == 0)
+                    freeSpaces++;
+            }
+
+            if (freeSpaces == 0)
+                return 0;
+            else
+                return -1;
         }
 
-        _restartButton.SetActive(true);
+        return -1;
     }
 
-    void ChangeSide()
+    public void PlayAgain()
     {
-        //_playerSide = (_playerSide == "X") ? "O" : "X";
-        _playerMove = (_playerMove == true) ? false : true;
-
-        //if (_playerSide == "X")
-        if (_playerMove == true)
-        {
-            SetPlayerColors(_playerX, _playerO);
-        }
-        else
-        {
-            SetPlayerColors(_playerO, _playerX);
-        }
-    }
-
-    void SetGameOverText(string message)
-    {
-        _gameOverPanel.SetActive(true);
-        _gameOverText.text = message;
-    }
-
-    public void RestartGame()
-    {
-
-        _moveCount = 0;
-        _gameOverPanel.SetActive(false);
-        _restartButton.SetActive(false);
-        SetPlayerButtons(true);
-        SetPlayerColorsInactive();
-        _startInfo.SetActive(true);
-        _playerMove = true;
-        _cpuDelay = 10;
-
-
-        for (int i = 0; i < _buttonList.Length; i++)
-        {
-            _buttonList[i].text = "";
-        }
-
-    }
-
-    void SetBoardInteractable(bool toggle)
-    {
-        for (int i = 0; i < _buttonList.Length; i++)
-        {
-            _buttonList[i].GetComponentInParent<Button>().interactable = toggle;
-        }
-    }
-
-    void SetPlayerButtons(bool toggle)
-    {
-        _playerX._button.interactable = toggle;
-        _playerO._button.interactable = toggle;
-    }
-
-    void SetPlayerColorsInactive()
-    {
-        _playerX._panel.color = _inactivePlayerColor._panelColor;
-        _playerX._text.color = _inactivePlayerColor._textColor;
-        _playerO._panel.color = _inactivePlayerColor._panelColor;
-        _playerO._text.color = _inactivePlayerColor._textColor;
+        ResetGameState();
     }
 }

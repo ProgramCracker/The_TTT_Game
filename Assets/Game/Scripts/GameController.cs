@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,38 +27,39 @@ public static class Globals
 
 public class GameController : MonoBehaviour
 {
-    public TMP_Text[] _buttonList;
     
+    [Header("Space Info")]
+    [SerializeField] TMP_Text[] _buttonList;
 
-    public GameObject _gameOverPanel;
-    public TMP_Text _gameOverText;
+    [Header("Game State UI")]
+    [SerializeField] GameObject _gameOverPanel;
+    [SerializeField] TMP_Text _gameOverText;
+    [SerializeField] GameObject _restartButton;
+    [SerializeField] TextMeshProUGUI _startInfo;
 
-    public GameObject _restartButton;
-
-    public Player _playerX;
-    public Player _playerO;
-    public PlayerColor _activePlayerColor;
-    public PlayerColor _inactivePlayerColor;
-
-    public GameObject _startInfo;
-
+    [Header("Game Info")]
+    [SerializeField] Player _playerX;
+    [SerializeField] Player _playerO;
+    [SerializeField] PlayerColor _activePlayerColor;
+    [SerializeField] PlayerColor _inactivePlayerColor;
+    [SerializeField] float _cpuDelay;
 
     private string _playerSide;
     private string _cpuSide;
     public bool _playerMove;
-    public float _cpuDelay;
+    
     private int _value;
 
     private int _moveCount;
 
     private void Awake()
     {
-        Debug.Log(Globals._difficulty);
+        
         _gameOverPanel.SetActive(false);
         SetGameControllerOnButtons();
         _moveCount = 0;
         _restartButton.SetActive(false);
-
+        Globals._difficulty = "SampleScene";
 
         _playerMove = true;
     }
@@ -126,7 +128,7 @@ public class GameController : MonoBehaviour
     {
         SetBoardInteractable(true);
         SetPlayerButtons(false);
-        _startInfo.SetActive(false);
+        //_startInfo.SetActive(false);
     }
 
     public string GetPlayerSide()
@@ -271,17 +273,22 @@ public class GameController : MonoBehaviour
         if (_playerMove == true)
         {
             SetPlayerColors(_playerX, _playerO);
+            
+            SetGameOverText(_playerSide + "'s Turn");
         }
         else
         {
             SetPlayerColors(_playerO, _playerX);
+            
+            SetGameOverText( _cpuSide + "'s Turn");
         }
     }
 
     void SetGameOverText(string message)
     {
-        _gameOverPanel.SetActive(true);
-        _gameOverText.text = message;
+        //_gameOverPanel.SetActive(true);
+        //_gameOverText.text = message;
+        _startInfo.text = message;
     }
 
     public void RestartGame()
@@ -292,7 +299,8 @@ public class GameController : MonoBehaviour
         _restartButton.SetActive(false);
         SetPlayerButtons(true);
         SetPlayerColorsInactive();
-        _startInfo.SetActive(true);
+        SetGameOverText("X or O" + System.Environment.NewLine + "Pick a Side");
+        //_startInfo.SetActive(true);
         _playerMove = true;
         _cpuDelay = 10;
 
