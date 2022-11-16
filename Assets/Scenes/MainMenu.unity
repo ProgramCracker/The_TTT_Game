@@ -802,7 +802,7 @@ GameObject:
   - component: {fileID: 1378097273}
   - component: {fileID: 1378097272}
   - component: {fileID: 1378097271}
-  - component: {fileID: 1378097270}
+  - component: {fileID: 1378097274}
   m_Layer: 5
   m_Name: Leave Game
   m_TagString: Untagged
@@ -831,19 +831,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 100}
   m_SizeDelta: {x: 360, y: 90}
   m_Pivot: {x: 0.5, y: 0}
---- !u!114 &1378097270
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1378097268}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3fb1fb77ac96331429a7542720e96030, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _targetScene: SampleScene
 --- !u!114 &1378097271
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -888,9 +875,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1378097270}
-        m_TargetAssemblyTypeName: SceneTransition, Assembly-CSharp
-        m_MethodName: ChangeScene
+      - m_Target: {fileID: 1378097274}
+        m_TargetAssemblyTypeName: Quit, Assembly-CSharp
+        m_MethodName: EndGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -938,6 +925,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1378097268}
   m_CullTransparentMesh: 1
+--- !u!114 &1378097274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1378097268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4048bda03b074d449777413ab70fca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1411416593
 GameObject:
   m_ObjectHideFlags: 0

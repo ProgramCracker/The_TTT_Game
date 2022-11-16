@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Quit : MonoBehaviour
 {
-    void EndGame()
+    public void EndGame()
     {
         Application.Quit();
     }
