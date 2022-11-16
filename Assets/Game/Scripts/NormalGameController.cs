@@ -4,30 +4,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-[System.Serializable]
-public class Player
-{
-    public Image _panel;
-    public TMP_Text _text;
-    public Button _button;
-}
 
-[System.Serializable]
-public class PlayerColor
-{
-    public Color _panelColor;
-    public Color _textColor;
-}
-
-public static class Globals
-{
-    static public string _difficulty;
-}
-
-public class GameController : MonoBehaviour
+public class NormalGameController : MonoBehaviour
 {
     public TMP_Text[] _buttonList;
-    
 
     public GameObject _gameOverPanel;
     public TMP_Text _gameOverText;
@@ -52,7 +32,6 @@ public class GameController : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log(Globals._difficulty);
         _gameOverPanel.SetActive(false);
         SetGameControllerOnButtons();
         _moveCount = 0;
@@ -69,39 +48,25 @@ public class GameController : MonoBehaviour
             _cpuDelay += _cpuDelay * Time.deltaTime;
             if(_cpuDelay >= 100)
             {
-                if (Globals._difficulty == "SampleScene")
+                _value = Random.Range(0, 8);
+                if (_buttonList[_value].GetComponentInParent<Button>().interactable == true)
                 {
-                    EasyCPU();
-                }
-                else if (Globals._difficulty == "NormalPlay")
-                {
-                    NormalCPU();
+                    _buttonList[_value].text = GetCPUSide();
+                    _buttonList[_value].GetComponentInParent<Button>().interactable = false;
+                    EndTurn();
                 }
             }
         }
     }
 
-    void NormalCPU()
-    {
 
-    }
 
-    void EasyCPU()
-    {
-        _value = Random.Range(0, 8);
-        if (_buttonList[_value].GetComponentInParent<Button>().interactable == true)
-        {
-            _buttonList[_value].text = GetCPUSide();
-            _buttonList[_value].GetComponentInParent<Button>().interactable = false;
-            EndTurn();
-        }
-    }
 
     void SetGameControllerOnButtons()
     {
         for (int i = 0; i < _buttonList.Length; i++)
         {
-            _buttonList[i].GetComponentInParent<GameSpace>().SetGameController(this);
+           // _buttonList[i].GetComponentInParent<GameSpace>().SetGameController(this);
         }
     }
 
