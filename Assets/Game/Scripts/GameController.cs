@@ -44,6 +44,8 @@ public class GameController : MonoBehaviour
     [SerializeField] PlayerColor _activePlayerColor;
     [SerializeField] PlayerColor _inactivePlayerColor;
     [SerializeField] float _cpuDelay;
+    [SerializeField] AudioSource _cpuTurnAudio;
+    [SerializeField] AudioSource _turnSwitchAudio;
 
     private string _playerSide;
     private string _cpuSide;
@@ -106,6 +108,7 @@ public class GameController : MonoBehaviour
         {
             _buttonList[_value].text = GetCPUSide();
             _buttonList[_value].GetComponentInParent<Button>().interactable = false;
+            _cpuTurnAudio.Play();
             EndTurn();
         }
     }
@@ -242,7 +245,7 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            ChangeSide();
+            StartCoroutine(ChangeSide()); 
             _cpuDelay = 10;
         }
 
@@ -275,10 +278,12 @@ public class GameController : MonoBehaviour
         _restartButton.SetActive(true);
     }
 
-    void ChangeSide()
+    IEnumerator ChangeSide()
     {
         //_playerSide = (_playerSide == "X") ? "O" : "X";
         _playerMove = (_playerMove == true) ? false : true;
+        yield return new WaitForSeconds(1);
+        _turnSwitchAudio.Play();
 
         //if (_playerSide == "X")
         if (_playerMove == true)
@@ -294,6 +299,7 @@ public class GameController : MonoBehaviour
             SetGameOverText( _cpuSide + "'s Turn");
         }
     }
+
 
     void SetGameOverText(string message)
     {
