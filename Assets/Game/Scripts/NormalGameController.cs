@@ -14,6 +14,10 @@ public class NormalGameController : MonoBehaviour
     [SerializeField] bool _AI1 = false;
     [SerializeField] bool _AI2 = false;
     [SerializeField] float _AIdelay;
+    [SerializeField] AudioSource _cpuTurnAudio;
+    [SerializeField] AudioSource _turnSwitchAudio;
+    [SerializeField] AudioSource _playerTurnAudio;
+    [SerializeField] GameObject _audioDump;
 
     public enum AILevel { VeryEasy, Easy, Medium, Impossible }
 
@@ -22,6 +26,7 @@ public class NormalGameController : MonoBehaviour
 
     [Header("Space Info")]
     [SerializeField] int[] _gridSpaces;
+
 
     [Header("Space Display")]
     [SerializeField] TextMeshProUGUI[] _gridText;
@@ -35,6 +40,7 @@ public class NormalGameController : MonoBehaviour
     [SerializeField] Player _playerO;
     [SerializeField] PlayerColor _activePlayerColor;
     [SerializeField] PlayerColor _inactivePlayerColor;
+
 
     void Start()
     {
@@ -85,18 +91,31 @@ public class NormalGameController : MonoBehaviour
         }
 
         _gameStateText.text = "Player " + _turn + "'s Turn";
+
+        if( _turn == 1)
+        {
+            _gameStateText.text = ("X's Turn");
+        }
+        else
+        {
+            _gameStateText.text = ("O's Turn");
+        }
+        _turnSwitchAudio.Play();
     }
 
     public void SpaceClicked(int spaceClicked)
     {
         SetPlayerColors(_playerO, _playerX);
+        
         if (_turn != -1 &&
             ((_turn == 1 && !_AI1) || (_turn == 2 && !_AI2)))
         {
-            
-            if (_gridSpaces[spaceClicked] == 0)
-                MakeMove(spaceClicked);
 
+            if (_gridSpaces[spaceClicked] == 0)
+            {
+                MakeMove(spaceClicked); // AI turn
+                _cpuTurnAudio.Play();
+            }
         }
     }
 
@@ -112,6 +131,7 @@ public class NormalGameController : MonoBehaviour
     IEnumerator AIMove()
     {
         yield return new WaitForSeconds(_AIdelay);
+        
 
         if ((_AI1 && _turn == 1) || (_AI2 && _turn == 2))
         {
@@ -206,12 +226,20 @@ public class NormalGameController : MonoBehaviour
         _gridSpaces[spaceToMove] = _turn;
         _turn = _turn == 1 ? 2 : 1;
         UpdateUI();
-
+        
         CheckEndGame();
-
         StartCoroutine(AIMove());
         
         _gridText[spaceToMove].GetComponentInParent<Button>().interactable = false;
+        
+    }
+
+    IEnumerator SwitchDelay()
+    {
+        yield return new WaitForSeconds(1);
+        
+        
+
     }
 
     List<int> GetPossibleMoves(int[] spacesToCheck)
@@ -228,12 +256,16 @@ public class NormalGameController : MonoBehaviour
 
     void Player1Wins()
     {
-        _gameStateText.text = "Player 1 Wins!";
+        _gameStateText.text = "X Wins!";
+        _audioDump.GetComponent<AudioDump>().Win();
+        _audioDump.GetComponent<AudioSource>().Play();
     }
 
     void Player2Wins()
     {
-        _gameStateText.text = "Player 2 Wins!";
+        _gameStateText.text = "O Wins!";
+        _audioDump.GetComponent<AudioDump>().Lose();
+        _audioDump.GetComponent<AudioSource>().Play();
     }
 
     void CheckEndGame()
@@ -254,6 +286,8 @@ public class NormalGameController : MonoBehaviour
     void Tie()
     {
         _gameStateText.text = "Tie!";
+        _audioDump.GetComponent<AudioDump>().Tie();
+        _audioDump.GetComponent<AudioSource>().Play();
     }
 
     void EndGame()

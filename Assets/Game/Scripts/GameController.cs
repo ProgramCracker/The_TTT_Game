@@ -47,6 +47,7 @@ public class GameController : MonoBehaviour
     [SerializeField] AudioSource _cpuTurnAudio;
     [SerializeField] AudioSource _turnSwitchAudio;
 
+    private AudioManager _audioManager;
     private string _playerSide;
     private string _cpuSide;
     public bool _playerMove;
@@ -65,6 +66,7 @@ public class GameController : MonoBehaviour
         Globals._difficulty = "SampleScene";
 
         _playerMove = true;
+
     }
 
     private void Update()
