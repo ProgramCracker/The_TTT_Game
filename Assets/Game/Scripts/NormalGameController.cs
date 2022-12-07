@@ -136,11 +136,11 @@ public class NormalGameController : MonoBehaviour
         if ((_AI1 && _turn == 1) || (_AI2 && _turn == 2))
         {
             int aiDepth = _aiDepth[(int)_aiLevel];
-            minimax(_gridSpaces, aiDepth, true, aiDepth);
+            FindNextMove(_gridSpaces, aiDepth, true, aiDepth);
         }
     }
 
-    int minimax(int[] currentSpaces, int aiDepth, bool maximizingPlayer, int initialDepth)
+    int FindNextMove(int[] currentSpaces, int aiDepth, bool PlayingPlayer, int initialDepth)
     {
         SetPlayerColors(_playerX, _playerO);
         int gameOver = CheckWin(currentSpaces);
@@ -160,7 +160,7 @@ public class NormalGameController : MonoBehaviour
             }
         }
 
-        if (maximizingPlayer)
+        if (PlayingPlayer)
         {
             int maxEval = -10000;
             List<int> possibleMoves = GetPossibleMoves(currentSpaces);
@@ -175,7 +175,7 @@ public class NormalGameController : MonoBehaviour
                 }
                 newSpaces[possibleMoves[i]] = _turn;
 
-                int eval = minimax(newSpaces, aiDepth - 1, false, initialDepth);
+                int eval = FindNextMove(newSpaces, aiDepth - 1, false, initialDepth);
                 if (initialDepth == aiDepth)
                 {
                     if (eval > maxEval)
@@ -213,7 +213,7 @@ public class NormalGameController : MonoBehaviour
                 }
                 newSpaces[possibleMoves[i]] = _turn == 1 ? 2 : 1;
 
-                int eval = minimax(newSpaces, aiDepth - 1, true, initialDepth);
+                int eval = FindNextMove(newSpaces, aiDepth - 1, true, initialDepth);
                 minEval = Mathf.Min(minEval, eval);
             }
 

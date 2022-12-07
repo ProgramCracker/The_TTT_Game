@@ -1873,8 +1873,8 @@ MonoBehaviour:
   _turnSwitchAudio: {fileID: 1636172381}
   _playerTurnAudio: {fileID: 831390081}
   _audioDump: {fileID: 1993991224}
-  _aiLevel: 2
-  _aiDepth: 01000000020000000300000004000000
+  _aiLevel: 3
+  _aiDepth: 010000000200000003000000040000000500000006000000
   _gridSpaces: 
   _gridText:
   - {fileID: 1768477529}
@@ -3542,10 +3542,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2052666932}
     m_Modifications:
-    - target: {fileID: 3699510914884592869, guid: e22cd4299432aec4d827796917298d4c, type: 3}
-      propertyPath: m_text
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 3965886576219010184, guid: e22cd4299432aec4d827796917298d4c, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

@@ -46,6 +46,7 @@ public class GameController : MonoBehaviour
     [SerializeField] float _cpuDelay;
     [SerializeField] AudioSource _cpuTurnAudio;
     [SerializeField] AudioSource _turnSwitchAudio;
+    [SerializeField] GameObject _audioDump;
 
     private AudioManager _audioManager;
     private string _playerSide;
@@ -270,11 +271,24 @@ public class GameController : MonoBehaviour
         if (winner == "draw")
         {
             SetGameOverText("It's a Draw!");
+            _audioDump.GetComponent<AudioDump>().Tie();
+            _audioDump.GetComponent<AudioSource>().Play();
             SetPlayerColorsInactive();
         }
         else
         {
             SetGameOverText(winner + " Wins!");
+        }
+        
+        if (_playerSide == winner)
+        {
+            _audioDump.GetComponent<AudioDump>().Win();
+            _audioDump.GetComponent<AudioSource>().Play();
+        }
+        else
+        {
+            _audioDump.GetComponent<AudioDump>().Lose();
+            _audioDump.GetComponent<AudioSource>().Play();
         }
 
         _restartButton.SetActive(true);
